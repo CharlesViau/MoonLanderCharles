@@ -8,6 +8,12 @@ public class PlayerControls : MonoBehaviour
 {
     private Rigidbody2D rb;
     private AudioSource src;
+    private ParticleSystem explosionVFX;
+    private SpriteRenderer sRenderer;
+
+    [SerializeField]private ParticleSystem jetParticle;
+    [SerializeField] private AudioSource jetSFX;
+
     private bool isControlLock = false;
 
     private const float ROTATION_SPEED = 1.0f;
@@ -20,8 +26,34 @@ public class PlayerControls : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         src = GetComponent<AudioSource>();
+        explosionVFX = GetComponent<ParticleSystem>();
+        sRenderer = GetComponent<SpriteRenderer>();
     }
+    private void Update()
+    {
+        if(Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+        if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+        {
+            jetParticle.Play();
+            jetSFX.Play();
+        }
+        else if(Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.Space))
+        {
+            jetParticle.Stop();
+            jetSFX.Stop();
+        }
 
+        if(isControlLock)
+        {
+            if (Input.anyKey)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+        }
+    }
     private void FixedUpdate()
     {
         if (!isControlLock)
@@ -30,7 +62,7 @@ public class PlayerControls : MonoBehaviour
             {
                 rb.AddTorque(ROTATION_SPEED);
             }
-            else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.LeftArrow))
+            else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             {
                 rb.AddTorque(-ROTATION_SPEED);
             }
@@ -57,7 +89,12 @@ public class PlayerControls : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Map") || (collision.gameObject.CompareTag("Finish") && !isControlLock))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            sRenderer.forceRenderingOff = true;
+            rb.bodyType = RigidbodyType2D.Static;
+            explosionVFX.Play();
+            src.Play();
+            jetParticle.Stop();
+            isControlLock = true;
         }
     }
     
