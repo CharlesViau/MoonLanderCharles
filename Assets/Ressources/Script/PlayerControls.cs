@@ -11,7 +11,7 @@ public class PlayerControls : MonoBehaviour
     private ParticleSystem explosionVFX;
     private SpriteRenderer sRenderer;
 
-    [SerializeField]private ParticleSystem jetParticle;
+    [SerializeField] private ParticleSystem jetParticle;
     [SerializeField] private AudioSource jetSFX;
 
     private bool isControlLock = false;
@@ -31,22 +31,30 @@ public class PlayerControls : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetKey(KeyCode.Escape))
+        if (Input.GetKey(KeyCode.Escape))
         {
             Application.Quit();
         }
-        if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+        if (!isControlLock)
         {
-            jetParticle.Play();
-            jetSFX.Play();
-        }
-        else if(Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.Space))
-        {
-            jetParticle.Stop();
-            jetSFX.Stop();
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+            {
+                jetParticle.Play();
+                jetSFX.Play();
+            }
+            if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.Space))
+            {
+                jetParticle.Stop();
+                jetSFX.Stop();
+            }
         }
 
-        if(isControlLock)
+        if (isControlLock)
+        {
+            jetParticle.Stop();
+        }
+
+        if (isControlLock && explosionVFX.isStopped && !src.isPlaying)
         {
             if (Input.anyKey)
             {
@@ -89,15 +97,10 @@ public class PlayerControls : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Map") || (collision.gameObject.CompareTag("Finish") && !isControlLock))
         {
-            sRenderer.forceRenderingOff = true;
-            rb.bodyType = RigidbodyType2D.Static;
-            explosionVFX.Play();
-            src.Play();
-            jetParticle.Stop();
-            isControlLock = true;
+            Destroy();
         }
     }
-    
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Finish"))
@@ -108,10 +111,21 @@ public class PlayerControls : MonoBehaviour
             {
                 Debug.Log("You Win");
                 isControlLock = true;
+                rb.bodyType = RigidbodyType2D.Static;
                 src.Play();
             }
-            else SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            else Destroy();
         }
     }
 
+    private void Destroy()
+    {
+        isControlLock = true;
+        rb.bodyType = RigidbodyType2D.Static;
+        sRenderer.forceRenderingOff = true;
+        jetSFX.Stop();
+        jetParticle.Stop();
+        explosionVFX.Play();
+        src.Play();
+    }
 }
