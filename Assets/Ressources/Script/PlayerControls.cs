@@ -22,6 +22,7 @@ public class PlayerControls : MonoBehaviour
     private const float WIN_SPEED_THRESHOLD = 3.0f;
     private const float WIN_ANGLE_THRESHOLD = 0.3f;
 
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -40,18 +41,13 @@ public class PlayerControls : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
                 jetParticle.Play();
-                jetSFX.Play();
+                jetSFX.Play();  
             }
             if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.Space))
             {
                 jetParticle.Stop();
                 jetSFX.Stop();
             }
-        }
-
-        if (isControlLock)
-        {
-            jetParticle.Stop();
         }
 
         if (isControlLock && explosionVFX.isStopped && !src.isPlaying)
@@ -124,8 +120,8 @@ public class PlayerControls : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Static;
         sRenderer.forceRenderingOff = true;
         jetSFX.Stop();
-        jetParticle.Stop();
         explosionVFX.Play();
         src.Play();
+        jetParticle.Stop();
     }
 }
